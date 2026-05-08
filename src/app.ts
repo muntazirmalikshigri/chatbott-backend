@@ -112,10 +112,12 @@ app.get('/', (req, res) => {
 
 // Chat API — open CORS (widget users have no cookies)
 app.use('/v1/chat', (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    const origin = req.headers.origin || '*'
+    res.setHeader('Access-Control-Allow-Origin', origin)
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+    if (req.method === 'OPTIONS') { res.status(200).end(); return; }
     next()
 })
 

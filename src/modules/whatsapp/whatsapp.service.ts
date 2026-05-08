@@ -88,17 +88,6 @@ const connectCompany = async (companyId: string): Promise<void> => {
 
     
 
-    // const sock = makeWASocket({
-    //   version,
-    //   auth: {
-    //     creds: state.creds,
-    //     keys: makeCacheableSignalKeyStore(state.keys, baileysLogger),
-    // },
-    //   printQRInTerminal: false,  // deprecated warning hatao
-    //   logger: baileysLogger,     // custom logger ki jagah baileysLogger
-    //   generateHighQualityLinkPreview: false,
-    // })
-
     // printQRInTerminal: false karo
     const sock = makeWASocket({
       version,

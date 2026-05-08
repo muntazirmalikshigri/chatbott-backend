@@ -1,7 +1,7 @@
 {
     "name": "base_server",
     "version": "1.0.0",
-    "main": "index.js",
+    "main": "dist/index.js",
     "bin": {
         "setup": "./cli/setup.js"
     },
