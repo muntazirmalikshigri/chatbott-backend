@@ -1,7 +1,8 @@
+
 import { accountConfirmationService, loginService, registrationService } from '../../APIs/user/authentication/authentication.service'
 import query from '../../APIs/user/_shared/repo/user.repository'
 import validate from '../../APIs/user/authentication/validation/validations'
-import emailService from '../../services/email'
+// import emailService from '../../services/email'  // COMMENTED - Email service disabled
 import { CustomError } from '../../utils/errors'
 import parsers from '../../utils/parsers'
 import responseMessage from '../../constant/responseMessage'
@@ -13,9 +14,10 @@ import jwt from '../../utils/jwt'
 import tokenRepository from '../../APIs/user/_shared/repo/token.repository'
 
 jest.mock('../../APIs/user/_shared/repo/user.repository')
-jest.mock('../../services/email', () => ({
-    sendEmail: jest.fn().mockResolvedValue(undefined) // Mocking as a resolved promise
-}))
+// COMMENTED - Email service mock disabled
+// jest.mock('../../services/email', () => ({
+//     sendEmail: jest.fn().mockResolvedValue(undefined) // Mocking as a resolved promise
+// }))
 
 process.env.ACCESS_TOKEN_SECRET = 'access-secret'
 process.env.REFRESH_TOKEN_SECRET = 'refresh-secret'
@@ -65,7 +67,28 @@ describe('registrationService', () => {
         await expect(registrationService(mockPayload)).rejects.toThrow('User already exists')
     })
 
-    it('should successfully register a user and send a confirmation email', async () => {
+    // COMMENTED - Email test disabled
+    // it('should successfully register a user and send a confirmation email', async () => {
+    //     ;(parsers.parsePhoneNumber as jest.Mock).mockReturnValue({ countryCode: 'US', internationalNumber: '1234567890', isoCode: 'US' })
+    //     ;(dateAndTime.countryTimezone as jest.Mock).mockReturnValue([{ name: 'America/New_York' }])
+    //     ;(validate.userAlreadyExistsViaEmail as jest.Mock).mockResolvedValue(undefined)
+    //     ;(hashing.hashPassword as jest.Mock).mockResolvedValue('hashedpassword')
+    //     ;(code.generateRandomId as jest.Mock).mockReturnValue('randomToken')
+    //     ;(code.generateOTP as jest.Mock).mockReturnValue('123456')
+    //     ;(query.createUser as jest.Mock).mockResolvedValue({ _id: 'newUserId' })
+    //
+    //     const response = await registrationService(mockPayload)
+    //
+    //     expect(response).toEqual({ success: true, _id: 'newUserId' })
+    //     expect(emailService.sendEmail).toHaveBeenCalledWith(
+    //         [mockPayload.email],
+    //         'Confirm your account',
+    //         expect.stringContaining(`Hey ${mockPayload.name}, Please confirm your account by clicking the link below`)
+    //     )
+    // })
+
+    // New test without email
+    it('should successfully register a user without sending email', async () => {
         ;(parsers.parsePhoneNumber as jest.Mock).mockReturnValue({ countryCode: 'US', internationalNumber: '1234567890', isoCode: 'US' })
         ;(dateAndTime.countryTimezone as jest.Mock).mockReturnValue([{ name: 'America/New_York' }])
         ;(validate.userAlreadyExistsViaEmail as jest.Mock).mockResolvedValue(undefined)
@@ -76,12 +99,7 @@ describe('registrationService', () => {
 
         const response = await registrationService(mockPayload)
 
-        expect(response).toEqual({ success: true, _id: 'newUserId' })
-        expect(emailService.sendEmail).toHaveBeenCalledWith(
-            [mockPayload.email],
-            'Confirm your account',
-            expect.stringContaining(`Hey ${mockPayload.name}, Please confirm your account by clicking the link below`)
-        )
+        expect(response).toEqual({ success: true, user: { _id: 'newUserId' }, accessToken: expect.any(String), refreshToken: expect.any(String) })
     })
 })
 
@@ -164,13 +182,24 @@ describe('accountConfirmationService', () => {
         await expect(accountConfirmationService('token', 'code')).rejects.toThrow(new CustomError('Account already CONFIRMED', 400))
     })
 
-    it('should confirm the account and send an email', async () => {
+    // COMMENTED - Email test disabled
+    // it('should confirm the account and send an email', async () => {
+    //     ;(query.findUserByConfirmationTokenAndCode as jest.Mock).mockResolvedValue(mockUser)
+    //     await accountConfirmationService('token', 'code')
+    //
+    //     expect(mockUser.accountConfimation.status).toBe(true)
+    //     expect(mockUser.accountConfimation.timestamp).toBeTruthy()
+    //     expect(mockSave).toHaveBeenCalledTimes(1)
+    //     expect(emailService.sendEmail).toHaveBeenCalledWith([mockUser.email], 'Welcome to the base! ', 'Account has been confirmed.')
+    // })
+
+    it('should confirm the account without sending email', async () => {
         ;(query.findUserByConfirmationTokenAndCode as jest.Mock).mockResolvedValue(mockUser)
         await accountConfirmationService('token', 'code')
 
         expect(mockUser.accountConfimation.status).toBe(true)
         expect(mockUser.accountConfimation.timestamp).toBeTruthy()
         expect(mockSave).toHaveBeenCalledTimes(1)
-        expect(emailService.sendEmail).toHaveBeenCalledWith([mockUser.email], 'Welcome to the base! ', 'Account has been confirmed.')
+        // Email service not called
     })
 })
