@@ -52,6 +52,18 @@
 //     })
 // })
 
+// // ✅ ADDED: Fix for frontend GET /v1 call
+// app.get('/v1', (req, res) => {
+//     httpResponse(res, req, 200, 'API v1 is running', {
+//         endpoints: { 
+//             health: '/v1/health', 
+//             self: '/v1/self', 
+//             login: '/v1/login',
+//             register: '/v1/register'
+//         }
+//     })
+// })
+
 // // Chat API — open CORS (widget users have no cookies)
 // app.use('/v1/chat', (req, res, next) => {
 //     const origin = req.headers.origin || '*'
@@ -98,18 +110,43 @@ app.use(helmet({
 
 app.use(cookieParser())
 
-// CORS — dashboard uses credentials (cookie auth)
-app.use(
-    cors({
-        methods: ['GET', 'POST', 'DELETE', 'OPTIONS', 'HEAD', 'PUT', 'PATCH'],
-        origin: (origin, callback) => {
-            // Allow dashboard origin with credentials
-            // Allow widget requests from any origin (no credentials)
-            callback(null, origin || '*')
-        },
-        credentials: true,
-    })
-)
+// ✅ FIXED CORS - Allow all origins for testing
+const allowedOrigins = [
+    'https://chatbot-frontent.vercel.app',
+    'https://chatbot-frontent-*.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5000'
+]
+
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true)
+        
+        // Check if origin matches any allowed pattern
+        const isAllowed = allowedOrigins.some(pattern => {
+            if (pattern.includes('*')) {
+                const regex = new RegExp(pattern.replace('*', '.*'))
+                return regex.test(origin)
+            }
+            return pattern === origin
+        })
+        
+        if (isAllowed) {
+            callback(null, true)
+        } else {
+            console.log('CORS blocked origin:', origin)
+            callback(null, true) // ✅ Temporarily allow all for testing
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+    exposedHeaders: ['Set-Cookie']
+}))
+
+// ✅ Handle preflight requests
+app.options('*', cors())
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -162,4 +199,3 @@ app.use(notFound)
 app.use(errorHandler)
 
 export default app
-// check
