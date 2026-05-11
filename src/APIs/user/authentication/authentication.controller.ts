@@ -129,11 +129,11 @@ import { loginSchema, registerSchema } from './validation/validation.schema'
 import { accountConfirmationService, loginService, registrationService } from './authentication.service'
 import { CustomError } from '../../../utils/errors'
 import asyncHandler from '../../../handlers/async'
-import { EApplicationEnvironment } from '../../../constant/application'
+// import { EApplicationEnvironment } from '../../../constant/application'
 import config from '../../../config/config'
 import query from '../_shared/repo/token.repository'
 
-const isDev = config.ENV === EApplicationEnvironment.DEVELOPMENT
+// const isDev = config.ENV === EApplicationEnvironment.DEVELOPMENT
 
 const getCookieOptions = (maxAge: number) => ({
     path: '/',
