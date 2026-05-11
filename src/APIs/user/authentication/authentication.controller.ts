@@ -137,17 +137,17 @@ const isDev = config.ENV === EApplicationEnvironment.DEVELOPMENT
 
 const getCookieOptions = (maxAge: number) => ({
     path: '/',
-    sameSite: isDev ? ('lax' as const) : ('strict' as const),
+    sameSite: 'none' as const,  // ← lax se none karo
     maxAge: 1000 * maxAge,
     httpOnly: true,
-    secure: !isDev,
+    secure: true,  // ← production mein always true (none requires secure)
 })
 
 const getClearOptions = () => ({
     path: '/',
-    sameSite: isDev ? ('lax' as const) : ('strict' as const),
+    sameSite: 'none' as const,
     httpOnly: true,
-    secure: !isDev,
+    secure: true,
 })
 
 export default {
