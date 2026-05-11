@@ -11,11 +11,12 @@ export default asyncHandler(async (request: Request, _response: Response, next: 
     try {
         const req = request as IAuthenticateRequest
 
-        const { cookies } = req
-
-        const { accessToken } = cookies as {
-            accessToken: string | undefined
-        }
+        const { cookies, headers } = req
+        const cookieToken = (cookies as { accessToken?: string }).accessToken
+        const bearerToken = headers.authorization?.startsWith('Bearer ')
+            ? headers.authorization.slice(7).trim()
+            : undefined
+        const accessToken = bearerToken || cookieToken
 
         if (accessToken) {
             const { userId } = jwt.verifyToken(accessToken, config.TOKENS.ACCESS.SECRET) as IDecryptedJwt
