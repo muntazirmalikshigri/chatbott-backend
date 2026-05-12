@@ -71,6 +71,7 @@ export interface IWhatsApp {
 export interface ICompany {
     name: string
     slug: string
+    email?: string | null
     ownerUserId: Types.ObjectId
     defaultKnowledgeBaseId?: Types.ObjectId | null
     description?: string
@@ -104,6 +105,15 @@ const companySchema = new Schema<ICompany>(
             type: String,
             required: true,
             trim: true
+        },
+        email: {
+            type: String,
+            trim: true,
+            default: null,
+            index: {
+                unique: true,
+                sparse: true
+            }
         },
         ownerUserId: {
             type: Schema.Types.ObjectId,
