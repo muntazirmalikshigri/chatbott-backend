@@ -55,7 +55,7 @@ const hasVectorSearchCapability = async (): Promise<boolean> => {
         }
 
         return major > 7 || (major === 7 && Number.isFinite(minor) && minor >= 0)
-    } catch (_error) {
+    } catch {
         return false
     }
 }
@@ -82,7 +82,7 @@ const vectorSearch = async (
 
     if (vectorSearchCapabilityCache) {
         try {
-            const results = (await knowledgeModel.aggregate([
+            const results = await knowledgeModel.aggregate<KnowledgeChunkWithScore>([
                 {
                     $vectorSearch: {
                         index: 'knowledge_embeddings',
@@ -100,7 +100,7 @@ const vectorSearch = async (
                         score: { $meta: 'vectorSearchScore' }
                     }
                 }
-            ])) as KnowledgeChunkWithScore[]
+            ])
 
             if (results.length) {
                 logger.info('RAG retrieval used vector search', {
@@ -145,7 +145,7 @@ const vectorSearch = async (
         .sort((left, right) => right.score - left.score)
         .slice(0, limit)
 
-    if (!scoredChunks.length || scoredChunks[0].score <= 0) {
+    if (!scoredChunks.length) {
         logger.info('No relevant similarity match found', {
             meta: {
                 knowledgeBaseId,
@@ -153,6 +153,17 @@ const vectorSearch = async (
             }
         })
         return []
+    }
+
+    if (scoredChunks[0].score <= 0) {
+        logger.warn('Cosine fallback returned non-positive scores, returning best available chunks anyway', {
+            meta: {
+                knowledgeBaseId,
+                agentId,
+                topScore: scoredChunks[0].score,
+                retrieved: scoredChunks.length
+            }
+        })
     }
 
     logger.info('RAG retrieval used cosine fallback', {
